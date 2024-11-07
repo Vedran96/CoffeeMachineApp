@@ -3,15 +3,10 @@ package CoffeeMachine;
 import java.io.*;
 
 public class CoffeeMachine {
-    //Postavljanje pocetnih vrijednosti zaliha aparata
-    private int water;
-    private int milk;
-    private int coffeeBeans;
-    private int cups;
-    private int money;
 
-    private String adminUsername = "vedran";
-    private String adminPassword = "vedran123";
+    private CoffeeMake state;
+
+
     public CoffeeMachine() {
         loadStatus();
     }
@@ -19,44 +14,44 @@ public class CoffeeMachine {
         // Odabir kave koju želimo kupiti
         switch (choice) {
             case 1: // Espresso
-                if (water < 250) {
+                if (state.getWater() < 250) {
                     System.out.println("Sorry, not enough water");
                     return;
                 }
-                if (coffeeBeans < 16) {
+                if (state.getCoffeeBeans() < 16) {
                     System.out.println("Sorry, not enough coffee beans");
                     return;
                 }
-                water -= 250;
-                coffeeBeans -= 16;
-                money += 4;
-                cups--;
+                state.setWater(state.getWater() - 250);
+                state.setCoffeeBeans(state.getCoffeeBeans() - 16);
+                state.setMoney(state.getMoney() + 4);
+                state.setCups(state.getCups() - 1);
                 System.out.println("I have enough resources, making you Espresso");
                 return;
 
             case 2: // Latte
-                if (water < 350 || milk < 75) {
+                if (state.getWater() < 350 || state.getMilk() < 75) {
                     System.out.println("Sorry, not enough resources");
                     return;
                 }
-                water -= 350;
-                milk -= 75;
-                coffeeBeans -= 20;
-                money += 7;
-                cups--;
+                state.setWater(state.getWater() - 350);
+                state.setMilk(state.getMilk() - 75);
+                state.setCoffeeBeans(state.getCoffeeBeans() - 20);
+                state.setMoney(state.getMoney() + 7);
+                state.setCups(state.getCups() - 1);
                 System.out.println("I have enough resources, making you Latte");
                 return;
 
             case 3: // Cappuccino
-                if (water < 200 || milk < 100) {
+                if (state.getWater() < 200 || state.getMilk() < 100) {
                     System.out.println("Sorry, not enough resources");
                     return;
                 }
-                water -= 200;
-                milk -= 100;
-                coffeeBeans -= 12;
-                money += 6;
-                cups--;
+                state.setWater(state.getWater() - 200);
+                state.setMilk(state.getMilk() - 100);
+                state.setCoffeeBeans(state.getCoffeeBeans() - 12);
+                state.setMoney(state.getMoney() + 6);
+                state.setCups(state.getCups() - 1);
                 System.out.println("I have enough resources, making you Cappuccino");
                 return;
 
@@ -64,11 +59,12 @@ public class CoffeeMachine {
                 System.out.println("Invalid choice");
         }
     }
+
     // Snimi status u datoteku
     public void saveStatus() {
         try (PrintWriter writer = new PrintWriter(new FileWriter("Docs/coffee_machine_status.txt"))) {
-            writer.println(water + ";" + milk + ";" + coffeeBeans + ";" + cups + ";" + money);
-            writer.println(adminUsername + ";" + adminPassword);
+            writer.println(state.getWater() + ";" + state.getMilk() + ";" + state.getCoffeeBeans() + ";" + state.getCups() + ";" + state.getMoney());
+            writer.println(state.getAdminUsername() + ";" + state.getAdminPassword());
         } catch (IOException e) {
             System.out.println("An error occurred while saving the status.");
         }
@@ -78,15 +74,17 @@ public class CoffeeMachine {
     public void loadStatus() {
         try (BufferedReader reader = new BufferedReader(new FileReader("Docs/coffee_machine_status.txt"))) {
             String[] status = reader.readLine().split(";");
-            water = Integer.parseInt(status[0]);
-            milk = Integer.parseInt(status[1]);
-            coffeeBeans = Integer.parseInt(status[2]);
-            cups = Integer.parseInt(status[3]);
-            money = Integer.parseInt(status[4]);
+            int water = Integer.parseInt(status[0]);
+            int milk = Integer.parseInt(status[1]);
+            int coffeeBeans = Integer.parseInt(status[2]);
+            int cups = Integer.parseInt(status[3]);
+            int money = Integer.parseInt(status[4]);
 
             String[] adminData = reader.readLine().split(";");
-            adminUsername = adminData[0];
-            adminPassword = adminData[1];
+            String adminUsername = adminData[0];
+            String adminPassword = adminData[1];
+
+            this.state = new CoffeeMake(water, milk, coffeeBeans, cups, money, adminUsername, adminPassword);
         } catch (FileNotFoundException e) {
             System.out.println("Status file not found, starting with default values.");
         } catch (IOException e) {
@@ -98,23 +96,22 @@ public class CoffeeMachine {
 
     public void fillMachine(int waterAmount, int milkAmount, int coffeeBeansAmount, int cupsAmount) {
         // Nadopuna aparata za kavu sa vodom, mlijekom, zrnom kave i šalicama
-        water += waterAmount;
-        milk += milkAmount;
-        coffeeBeans += coffeeBeansAmount;
-        cups += cupsAmount;
+        state.setWater(state.getWater() + waterAmount);
+        state.setMilk(state.getMilk() + milkAmount);
+        state.setCoffeeBeans(state.getCoffeeBeans() + coffeeBeansAmount);
+        state.setCups(state.getCups() + cupsAmount);
     }
 
-    public void takeMoney()
-    // Uzimanje novaca iz aparata
-    {
-        System.out.println("I gave you $" + money);
-        money = 0;
+    public void takeMoney() {
+        // Uzimanje novaca iz aparata
+        System.out.println("I gave you $" + state.getMoney());
+        state.setMoney(0);
     }
+
     public void printRemainingCoffeeMachine() {
         // Ispis podataka o stanju aparata
-        System.out.println("CoffeeMachine{ water=" + water + ", milk=" + milk +
-                ", coffeeBeans=" + coffeeBeans + ", cups=" + cups + ", money=" + money + "}");
-
+        System.out.println("CoffeeMachine{ water=" + state.getWater() + ", milk=" + state.getMilk() +
+                ", coffeeBeans=" + state.getCoffeeBeans() + ", cups=" + state.getCups() + ", money=" + state.getMoney() + "}");
     }
 
 }
